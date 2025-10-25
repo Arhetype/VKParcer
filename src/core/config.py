@@ -1,9 +1,4 @@
-"""
-Конфигурация приложения
-"""
-
 import os
-from typing import Optional
 from dotenv import load_dotenv
 from .base import BaseConfig, BaseLogger
 

@@ -1,10 +1,5 @@
-"""
-Менеджер базы данных
-"""
-
 import sqlite3
 import json
-from datetime import datetime
 from typing import List, Dict, Any, Optional
 
 from ..core.base import BaseDatabase, VideoInfo, Comment, AnalysisResult, BaseLogger
@@ -24,8 +19,8 @@ class DatabaseManager(BaseDatabase):
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            # Таблица для хранения информации о видео
+
+
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS videos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,

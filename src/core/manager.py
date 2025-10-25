@@ -1,7 +1,3 @@
-"""
-Основной менеджер приложения
-"""
-
 from typing import Dict, Any, Optional
 from datetime import datetime
 
@@ -10,7 +6,7 @@ from ..core.config import config
 from ..parsers.vk_parser import VKParser
 from ..analyzers.gigachat_analyzer import GigaChatAnalyzer
 from ..database.manager import DatabaseManager
-from ..utils.helpers import extract_video_id, format_analysis_report
+from ..utils.helpers import format_analysis_report
 
 
 class CommentAnalyzer(BaseManager):

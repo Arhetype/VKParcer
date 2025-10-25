@@ -1,7 +1,3 @@
-"""
-Базовые классы и интерфейсы для парсера комментариев ВК
-"""
-
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass

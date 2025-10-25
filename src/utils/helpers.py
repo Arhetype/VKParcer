@@ -1,11 +1,6 @@
-"""
-Утилиты для работы с данными
-"""
-
 import re
 import json
 from typing import Dict, Any, Optional
-from datetime import datetime
 
 
 def extract_video_id(video_url: str) -> Optional[str]:

@@ -1,7 +1,3 @@
-"""
-Парсер комментариев ВКонтакте
-"""
-
 import requests
 import time
 from typing import List, Optional, Dict, Any
