@@ -1,0 +1,6 @@
+# VK API настройки
+VK_ACCESS_TOKEN=your_vk_access_token_here
+
+# GigaChat API настройки  
+GIGACHAT_CLIENT_ID=your_gigachat_client_id_here
+GIGACHAT_CLIENT_SECRET=your_gigachat_client_secret_here
