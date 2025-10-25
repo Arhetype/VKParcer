@@ -33,19 +33,16 @@ def extract_video_id(video_url: str) -> Optional[str]:
 def parse_json_from_text(text: str) -> Optional[Dict[str, Any]]:
     """Извлечение JSON из текста с markdown разметкой"""
     try:
-        # Ищем JSON блок между ```json и ```
         json_match = re.search(r'```json\s*(.*?)\s*```', text, re.DOTALL)
         if json_match:
             clean_text = json_match.group(1).strip()
         else:
-            # Если нет markdown разметки, используем весь текст
             clean_text = text.strip()
             if clean_text.startswith('```json'):
-                clean_text = clean_text[7:]  # Убираем ```json
+                clean_text = clean_text[7:]
             if clean_text.endswith('```'):
-                clean_text = clean_text[:-3]  # Убираем ```
-        
-        # Убираем комментарии (строки с //)
+                clean_text = clean_text[:-3]
+
         lines = clean_text.split('\n')
         clean_lines = []
         for line in lines:
@@ -72,23 +69,19 @@ def parse_text_response(text: str) -> Dict[str, Any]:
         'overall_sentiment_score': 5,
         'recommendations': []
     }
-    
-    # Ищем упоминания позитивных комментариев
+
     positive_match = re.search(r'позитивн[а-я]*\s*комментари[а-я]*[:\s]*(\d+)', text, re.IGNORECASE)
     if positive_match:
         result['positive_count'] = int(positive_match.group(1))
-    
-    # Ищем упоминания негативных комментариев
+
     negative_match = re.search(r'негативн[а-я]*\s*комментари[а-я]*[:\s]*(\d+)', text, re.IGNORECASE)
     if negative_match:
         result['negative_count'] = int(negative_match.group(1))
-    
-    # Ищем упоминания нейтральных комментариев
+
     neutral_match = re.search(r'нейтральн[а-я]*\s*комментари[а-я]*[:\s]*(\d+)', text, re.IGNORECASE)
     if neutral_match:
         result['neutral_count'] = int(neutral_match.group(1))
-    
-    # Ищем оценку настроения
+
     score_match = re.search(r'оценк[а-я]*\s*настроени[а-я]*[:\s]*(\d+)', text, re.IGNORECASE)
     if score_match:
         result['overall_sentiment_score'] = int(score_match.group(1))
