@@ -3,7 +3,7 @@ import time
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
-from ..core.base import BaseParser, VideoInfo, Comment, BaseLogger
+from ..core.base import BaseParser, BaseLogger, VideoInfo, Comment
 from ..core.config import config
 from ..utils.helpers import extract_video_id
 

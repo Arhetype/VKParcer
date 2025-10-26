@@ -33,6 +33,7 @@ def extract_video_id(video_url: str) -> Optional[str]:
 def parse_json_from_text(text: str) -> Optional[Dict[str, Any]]:
     """Извлечение JSON из текста с markdown разметкой"""
     try:
+        # Ищем JSON блок между ```json и ```
         json_match = re.search(r'```json\s*(.*?)\s*```', text, re.DOTALL)
         if json_match:
             clean_text = json_match.group(1).strip()
@@ -43,14 +44,20 @@ def parse_json_from_text(text: str) -> Optional[Dict[str, Any]]:
             if clean_text.endswith('```'):
                 clean_text = clean_text[:-3]
 
+        # Убираем комментарии (строки с //)
         lines = clean_text.split('\n')
         clean_lines = []
         for line in lines:
+            # Убираем комментарии после //
             if '//' in line:
                 line = line[:line.index('//')]
             clean_lines.append(line.strip())
         
         clean_text = '\n'.join(clean_lines)
+        
+        # Убираем лишние запятые в конце объектов/массивов
+        clean_text = re.sub(r',\s*}', '}', clean_text)
+        clean_text = re.sub(r',\s*]', ']', clean_text)
         
         return json.loads(clean_text)
         
@@ -70,21 +77,49 @@ def parse_text_response(text: str) -> Dict[str, Any]:
         'recommendations': []
     }
 
+    # Ищем упоминания позитивных комментариев
     positive_match = re.search(r'позитивн[а-я]*\s*комментари[а-я]*[:\s]*(\d+)', text, re.IGNORECASE)
     if positive_match:
         result['positive_count'] = int(positive_match.group(1))
-
+    
+    # Ищем упоминания негативных комментариев
     negative_match = re.search(r'негативн[а-я]*\s*комментари[а-я]*[:\s]*(\d+)', text, re.IGNORECASE)
     if negative_match:
         result['negative_count'] = int(negative_match.group(1))
-
+    
+    # Ищем упоминания нейтральных комментариев
     neutral_match = re.search(r'нейтральн[а-я]*\s*комментари[а-я]*[:\s]*(\d+)', text, re.IGNORECASE)
     if neutral_match:
         result['neutral_count'] = int(neutral_match.group(1))
-
+    
+    # Ищем оценку настроения
     score_match = re.search(r'оценк[а-я]*\s*настроени[а-я]*[:\s]*(\d+)', text, re.IGNORECASE)
     if score_match:
         result['overall_sentiment_score'] = int(score_match.group(1))
+    
+    # Ищем сильные стороны
+    strong_points_match = re.search(r'"strong_points":\s*\[(.*?)\]', text, re.DOTALL)
+    if strong_points_match:
+        strong_text = strong_points_match.group(1)
+        # Извлекаем элементы массива
+        strong_items = re.findall(r'"([^"]+)"', strong_text)
+        result['strong_points'] = strong_items
+    
+    # Ищем слабые стороны
+    weak_points_match = re.search(r'"weak_points":\s*\[(.*?)\]', text, re.DOTALL)
+    if weak_points_match:
+        weak_text = weak_points_match.group(1)
+        # Извлекаем элементы массива
+        weak_items = re.findall(r'"([^"]+)"', weak_text)
+        result['weak_points'] = weak_items
+    
+    # Ищем рекомендации
+    recommendations_match = re.search(r'"recommendations":\s*\[(.*?)\]', text, re.DOTALL)
+    if recommendations_match:
+        rec_text = recommendations_match.group(1)
+        # Извлекаем элементы массива
+        rec_items = re.findall(r'"([^"]+)"', rec_text)
+        result['recommendations'] = rec_items
     
     return result
 

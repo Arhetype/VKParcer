@@ -139,7 +139,14 @@ class GigaChatAnalyzer(BaseAnalyzer):
                 result = response.json()
                 
                 if 'choices' in result and result['choices']:
-                    analysis_text = result['choices'][0]['message']['content']
+                    choice = result['choices'][0]
+                    analysis_text = choice['message']['content']
+                    
+                    # Проверяем, не заблокирован ли запрос
+                    if choice.get('finish_reason') == 'blacklist':
+                        self.logger.warning("GigaChat заблокировал анализ этого контента")
+                        self.logger.info("Попробуем использовать упрощенный анализ...")
+                        return self._simple_sentiment_analysis(comments)
                     
                     # Пытаемся распарсить JSON ответ
                     analysis_data = parse_json_from_text(analysis_text)
@@ -160,3 +167,68 @@ class GigaChatAnalyzer(BaseAnalyzer):
         except Exception as e:
             self.logger.error(f"Ошибка при анализе комментариев: {e}")
             return {}
+    
+    def _simple_sentiment_analysis(self, comments: List[str]) -> Dict[str, Any]:
+        """Упрощенный анализ настроения на основе ключевых слов"""
+        positive_keywords = [
+            'классный', 'отличный', 'супер', 'крутой', 'замечательный', 'прекрасный',
+            'хороший', 'великолепный', 'потрясающий', 'восхитительный', 'блестящий',
+            'люблю', 'нравится', 'обожаю', 'рекомендую', 'браво', 'ура', 'вау'
+        ]
+        
+        negative_keywords = [
+            'плохой', 'ужасный', 'отвратительный', 'говно', 'позорище', 'гадость',
+            'не нравится', 'не люблю', 'ненавижу', 'отвратительно', 'мерзость',
+            'скучный', 'тупой', 'глупый', 'бесполезный', 'разочарование'
+        ]
+        
+        positive_count = 0
+        negative_count = 0
+        neutral_count = 0
+        
+        strong_points = []
+        weak_points = []
+        
+        for comment in comments:
+            comment_lower = comment.lower()
+            
+            # Проверяем позитивные ключевые слова
+            has_positive = any(keyword in comment_lower for keyword in positive_keywords)
+            has_negative = any(keyword in comment_lower for keyword in negative_keywords)
+            
+            if has_positive and not has_negative:
+                positive_count += 1
+            elif has_negative and not has_positive:
+                negative_count += 1
+            else:
+                neutral_count += 1
+        
+        # Определяем сильные и слабые стороны
+        if positive_count > negative_count:
+            strong_points.append("положительные отзывы преобладают")
+        if negative_count > positive_count:
+            weak_points.append("отрицательные отзывы преобладают")
+        
+        # Рассчитываем общую оценку
+        total = positive_count + negative_count + neutral_count
+        if total > 0:
+            sentiment_ratio = (positive_count - negative_count) / total
+            overall_score = max(1, min(10, int(5 + sentiment_ratio * 5)))
+        else:
+            overall_score = 5
+        
+        result = {
+            'positive_count': positive_count,
+            'negative_count': negative_count,
+            'neutral_count': neutral_count,
+            'strong_points': strong_points,
+            'weak_points': weak_points,
+            'overall_sentiment_score': overall_score,
+            'recommendations': [
+                "анализ выполнен на основе ключевых слов",
+                "для более точного анализа рекомендуется использовать полный анализ GigaChat"
+            ]
+        }
+        
+        self.logger.info("Выполнен упрощенный анализ на основе ключевых слов")
+        return result
